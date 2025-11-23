@@ -1,0 +1,82 @@
+# 민감한 정보
+.env
+.env.local
+.env.*.local
+AFIGserviceAccountKey.json
+config.py
+
+# Python 가상환경
+flask/
+venv/
+env/
+ENV/
+.venv/
+
+# Python 캐시
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 배포 관련
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 개발 도구
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.claude/
+
+# 로그
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 테스트
+.pytest_cache/
+.coverage
+.tox/
+htmlcov/
+homework_check/
+
+# 업로드 파일 (선택적)
+uploads/
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+uploads/*.gif
+uploads/*.webp
+!uploads/.gitkeep
+
+# 임시 파일
+temp.py
+*.tmp
+generated_image*.png
+qrcode_*.png
+
+# OS 파일
+Thumbs.db
+.DS_Store
+
+# Docker (로컬 오버라이드 파일만 제외)
+docker-compose.override.yml
+
+ai생성물/

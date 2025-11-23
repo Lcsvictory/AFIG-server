@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  flask-app:
+    build: .
+    container_name: afig-flask-server
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      # 환경변수는 .env 파일에서 자동으로 로드됩니다
+    env_file:
+      - .env
+    volumes:
+      # 소스 코드 마운트 (개발 중 수정사항 즉시 반영)
+      - ./app.py:/app/app.py
+      - ./config.py:/app/config.py
+      - ./fcm_manager.py:/app/fcm_manager.py
+      - ./professor.py:/app/professor.py
+      - ./student.py:/app/student.py
+      - ./meal_image_generator.py:/app/meal_image_generator.py
+      # 업로드 파일 영구 저장
+      - ./uploads:/app/uploads
+      # Firebase 인증 키 (읽기 전용)
+      - ./AFIGserviceAccountKey.json:/app/AFIGserviceAccountKey.json:ro
+    command: python app.py
+    restart: unless-stopped
+    networks:
+      - afig-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  afig-network:
+    driver: bridge
