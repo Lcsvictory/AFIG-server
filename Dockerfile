@@ -23,8 +23,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY config.py .
 COPY fcm_manager.py .
-COPY professor.py .
-COPY student.py .
 COPY meal_image_generator.py .
 COPY AFIGserviceAccountKey.json .
 
