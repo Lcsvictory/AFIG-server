@@ -12,6 +12,54 @@ import json
 # Firebase는 app.py에서 이미 초기화됨
 
 
+def send_force_logout_fcm(device_token, reason="다른 기기에서 로그인되었습니다."):
+    """
+    특정 디바이스에 강제 로그아웃 FCM 발송 (알림 설정 무시, 히스토리 저장 안 함)
+    
+    Args:
+        device_token: 강제 로그아웃할 기기의 FCM 토큰
+        reason: 로그아웃 사유 메시지
+    
+    Returns:
+        성공 여부 (bool)
+    """
+    try:
+        # data-only 메시지로 발송 (notification 없이)
+        # 클라이언트가 앱 상태와 관계없이 처리할 수 있도록
+        message = messaging.Message(
+            data={
+                'type': 'force_logout',
+                'reason': reason,
+                'timestamp': str(datetime.now().isoformat())
+            },
+            token=device_token,
+            android=messaging.AndroidConfig(
+                priority='high'
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        content_available=True  # 백그라운드에서도 처리 가능
+                    )
+                )
+            )
+        )
+        
+        response = messaging.send(message)
+        print(f"🔐 강제 로그아웃 FCM 발송 성공: token={device_token[:20]}..., response={response}")
+        return True
+        
+    except messaging.UnregisteredError:
+        print(f"⚠️ 강제 로그아웃 FCM 발송 실패 (토큰 만료): {device_token[:20]}...")
+        return False
+    except messaging.InvalidArgumentException:
+        print(f"⚠️ 강제 로그아웃 FCM 발송 실패 (잘못된 토큰): {device_token[:20]}...")
+        return False
+    except Exception as e:
+        print(f"❌ 강제 로그아웃 FCM 발송 오류: {e}")
+        return False
+
+
 def get_db_connection():
     """데이터베이스 연결 생성"""
     conn = pymysql.connect(

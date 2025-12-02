@@ -4362,12 +4362,28 @@ def register_fcm_token():
     try:
         conn, cur = conn_cur_create()
         
-        # 한 학생당 하나의 토큰만 유지: 기존 토큰 삭제 후 새 토큰 등록
-        # 1. 이전 토큰 모두 삭제
+        # 1. 기존 토큰 조회 (강제 로그아웃 알림 발송용)
+        cur.execute("""
+            SELECT device_token 
+            FROM fcm_tokens 
+            WHERE student_number = %s AND device_token != %s
+        """, (student_number, device_token))
+        existing_tokens = cur.fetchall()
+        
+        # 2. 기존 기기에 강제 로그아웃 FCM 발송
+        force_logout_sent = False
+        if existing_tokens:
+            for token_row in existing_tokens:
+                old_token = token_row['device_token']
+                print(f"🔐 다른 기기 감지: 학생={student_number}, 기존 토큰={old_token[:20]}...")
+                if fcm_manager.send_force_logout_fcm(old_token, "다른 기기에서 로그인되었습니다."):
+                    force_logout_sent = True
+        
+        # 3. 이전 토큰 모두 삭제
         delete_sql = "DELETE FROM fcm_tokens WHERE student_number = %s"
         cur.execute(delete_sql, (student_number,))
         
-        # 2. 새 토큰 등록
+        # 4. 새 토큰 등록
         insert_sql = """
             INSERT INTO fcm_tokens (student_number, device_token, device_type)
             VALUES (%s, %s, %s)
@@ -4375,12 +4391,16 @@ def register_fcm_token():
         cur.execute(insert_sql, (student_number, device_token, device_type))
         conn.commit()
         
-        print(f"✅ FCM 토큰 등록: 학생={student_number}, type={device_type} (이전 토큰 삭제됨)")
+        if force_logout_sent:
+            print(f"✅ FCM 토큰 등록: 학생={student_number}, type={device_type} (기존 기기 강제 로그아웃 알림 발송됨)")
+        else:
+            print(f"✅ FCM 토큰 등록: 학생={student_number}, type={device_type} (이전 토큰 삭제됨)")
         
         return jsonify({
             "message": "FCM token registered successfully",
             "student_number": student_number,
-            "device_type": device_type
+            "device_type": device_type,
+            "force_logout_sent": force_logout_sent if existing_tokens else False
         }), 200
         
     except Exception as e:
