@@ -3173,6 +3173,8 @@ def download_material(material_id):
             return jsonify({"error": "File not found"}), 404
         
         file_path = file_paths[file_index].strip()
+        # 윈도우/리눅스 경로 호환성: 백슬래시를 슬래시로 변환
+        file_path = file_path.replace('\\', '/')
         full_path = os.path.join(app.config['UPLOAD_FOLDER'], file_path)
         print(f"   파일 경로: {full_path}")
         
