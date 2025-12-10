@@ -3897,10 +3897,10 @@ def generate_meal_image(menu_text, meal_type, date_str):
         print(f"   메뉴: {menu_str[:50]}...")
         
         # Google AI로 이미지 생성
-        response = genai_client.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=[prompt],
-        )
+        # response = genai_client.models.generate_content(
+        #     model="gemini-2.5-flash-image",
+        #     contents=[prompt],
+        # )
         
         # 이미지 추출 및 저장
         for part in response.candidates[0].content.parts:
